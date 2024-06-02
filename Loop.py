@@ -4,12 +4,14 @@ import shutil
 import datetime
 import subprocess
 import time
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 current_index = 0
 max_count = 30
 wait_launch_time = 50
 wait_next_time = 10
-dst_folder = "todop"
+dst_folder = "todo"
 
 get_log_record_list = 'for /f "delims=" %a in (\'adb shell find /storage/emulated/0/Android/data/todo/files/ -name "todo.todo"\') do adb pull "%a" {0}'.format(dst_folder)
 
@@ -35,7 +37,15 @@ def calc_average_time(path,keywords):
             result = f"{key}: {average:.2f} (sample num: {len(values)})"
             print(result)
             f.write(result + "\n")
+
+            # can also draw something here
+            # fig, ax = plt.subplots()
+            # ax.plot(values)
+            # ax.set_title(key)
+            # sns.displot(values)
+            # plt.show()
         f.close()
+    
 
 
 def get_average_time(keywords):
