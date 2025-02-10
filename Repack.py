@@ -9,9 +9,13 @@ import time
 import zipfile
 
 # Config
-need_push_sth = False
-need_adb_log = False
-apk_name_no_suffix = 'todo'
+push_localconf = False
+need_adb_log = True
+only_unity_log = True
+need_replay = False
+uninstall_previous = False
+apk_name_no_suffix = ''
+uncompress_resource = True
 
 if len(sys.argv) == 2:
     apk_name_no_suffix = os.path.basename(sys.argv[1][:-4])
@@ -65,6 +69,36 @@ def capture_adb_log():
     with open("adb_log_output.log", "w") as file:
         subprocess.run(logcat_command, stdout=file, stderr=subprocess.STDOUT)
 
+def compress_directory_with_uncompressed_resources_arsc(source_dir, zip_path):
+    """
+    1. Compress all files except `resources.arsc` with ZIP_DEFLATED.
+    2. Reopen in append mode ('a') and add `resources.arsc` with ZIP_STORED.
+    """
+    # 1) Write everything except resources.arsc with compression
+    with zipfile.ZipFile(zip_path, 'w', compression=zipfile.ZIP_DEFLATED) as zipf:
+        for root, dirs, files in os.walk(source_dir):
+            for filename in files:
+                if filename == 'resources.arsc':
+                    # Skip for now; we'll add it uncompressed later.
+                    continue
+                filepath = os.path.join(root, filename)
+                arcname = os.path.relpath(filepath, start=source_dir)
+                zipf.write(filepath, arcname)
+
+    # 2) If resources.arsc exists, add it uncompressed
+    resources_path = os.path.join(source_dir, 'resources.arsc')
+    if os.path.exists(resources_path):
+        # Append mode
+        with zipfile.ZipFile(zip_path, 'a') as zipf:
+            # Create ZipInfo to specify per-file compression
+            info = zipfile.ZipInfo('resources.arsc')
+            info.compress_type = zipfile.ZIP_STORED  # no compression
+            # Read the file’s data
+            with open(resources_path, 'rb') as f:
+                data = f.read()
+            # Add it to the zip archive
+            zipf.writestr(info, data)
+
 def do():
     print('let\'s go!')
     
@@ -101,8 +135,17 @@ def do():
     else:
         print("can't find origin apk, skipped")
 
-    shutil.make_archive(apk_name_no_suffix, 'zip', temp_path)
-    os.rename(apk_name_no_suffix + '.zip', apk_name)
+    if uncompress_resource:
+        compress_directory_with_uncompressed_resources_arsc(temp_path, apk_name_no_suffix + '.zip')
+        os.rename(apk_name_no_suffix + '.zip', unaligned_name)
+         # https://github.com/mathieures/convert-apk
+        os.system(zipalign_command)
+        os.remove(unaligned_name)
+        print('zipalign done')
+    else:
+        shutil.make_archive(apk_name_no_suffix, 'zip', temp_path)
+        os.rename(apk_name_no_suffix + '.zip', apk_name)
+
     print('re zip done')
 
     os.system(sign_command)
@@ -111,8 +154,9 @@ def do():
     os.system(clean_command)
     os.system(kill_game)
 
-    os.system('adb uninstall {0}'.format(package_name))
-    print('uninstall previous apk done')
+    if uninstall_previous:
+        os.system('adb uninstall {0}'.format(package_name))
+        print('uninstall previous apk done')
 
     os.system('adb install -g {0}'.format(apk_name))
     print('install new apk done')
