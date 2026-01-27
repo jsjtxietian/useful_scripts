@@ -1,0 +1,50 @@
+# Format: <SettingName>: <Settingvalue>
+# Setting name must appear at start of line and there must be whitespace after the colon.
+# Multiple values can be comma separated or on subsequent lines.
+# 
+# The local settings file allows you to set the path to a shared
+# settings file. Settings in the local settings file will override
+# the shared settings. Settings can be moved from the shared settings
+# file to the local settings file.
+
+# 
+# General
+# 
+
+# Path to the settings folder. Changing this will move your settings to the new folder if they don't exist there already.
+# Valid values: path
+SettingsPath:             ./
+
+# Diff executable. Eg p4merge <file1> <file2>
+DiffExe:                  p4merge <file1> <file2>
+
+# 
+# SourceControl
+# 
+
+# The source control to use
+# Valid values: None, Perforce, Git, SVN
+SourceControl:            Git
+
+# Server address for the perforce server, eg: 127.0.0.1:1666
+# Valid values: ip:port
+PerforceServerAddress:    
+
+# Perforce workspace user name
+PerforceUserName:         
+
+# Perforce workspace client name
+PerforceClientName:       
+
+# Perforce char set
+PerforceCharSet:          
+
+# timeout in seconds for Perforce commands
+PerforceTimeout:          40
+
+# enable or disable p4 config txt files
+PerforceEnableP4Config:   true
+
+# The command to use to diff a file. <file> is replace with the current file path
+SVNDiffCommand:           "C:\Program Files\TortoiseSVN\bin\TortoiseProc.exe" /command:diff /path:"<file>"
+

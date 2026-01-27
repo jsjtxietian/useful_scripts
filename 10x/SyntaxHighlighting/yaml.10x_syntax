@@ -1,0 +1,63 @@
+# Format: <SettingName>: <Settingvalue>
+# Setting name must appear at start of line and there must be whitespace after the colon.
+# Multiple values can be comma separated or on subsequent lines.
+#
+# Valid settings for colour rules:
+# REGEX()   A regular expression. Colours entire match or first group.
+# WORD()	Matches a word (case sensitive)
+# WORDI()   Matches a word (case insensitive)
+# TEXT()	Match any text in the line (case sensitive)
+# TEXTI()	Match any text in the line (case insensitive)
+
+#----------------------------------------------
+# settings
+
+Extensions: *.yaml,.clang-rules
+
+#----------------------------------------------
+# colour rules
+
+Language.Comment:
+REGEX(#.*)
+
+Language.DocumentMarker:
+REGEX(^---$)
+REGEX(^\.\.\.$)
+
+Language.Namespace:
+WORD(Namespace:)
+
+Language.Variable:
+REGEX(^\s*([ A-Za-z0-9_-]+):\s)
+#REGEX(^[ \t]*- )
+
+Language.String:
+REGEX(L?"[^"\\]*(?:\\.[^"\\]*)*")
+REGEX(L?'[^'\\]*(?:\\.[^'\\]*)*')
+
+Language.Number:
+REGEX(\b[0-9]+\.[0-9]+\b)      # float
+REGEX(\b[0-9]+\b)              # int
+
+Language.Boolean:
+WORD(true)
+WORD(false)
+WORD(True)
+WORD(False)
+
+Language.Null:
+WORD(null)
+WORD(Null)
+WORD(NULL)
+WORD(~)
+
+Language.Bracket:
+TEXT(()
+TEXT())
+
+Language.Comma:
+TEXT(,)
+
+Language.Function:
+REGEX(\b([a-zA-Z_]+\w*)\()
+
